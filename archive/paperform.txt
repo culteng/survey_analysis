@@ -1,0 +1,21 @@
+# paperform calculation question
+
+#### without vars
+array(
+    numbervalue(regexreplace({{ amvjd }}, 
+		"Grade ", ""
+    ))
+,
+	switch({{ 6gqb1 }}, 
+		"Male", 1, 
+		"Female", 2 
+	)
+,
+	switch({{ 6puat }}, 
+		"1 - Strongly Disagree", 1, 
+		"2 - Disagree", 2, 
+		"3 - Neither agree nor disagree", 3, 
+		"4 - Agree", 4, 
+		"5 - Strongly Agree", 5 
+		)
+)
