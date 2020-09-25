@@ -4,6 +4,9 @@ import os
 import glob
 import pandas as pd
 import time
+# for waffle
+import matplotlib.pyplot as plt
+from pywaffle import Waffle
 
 
 def populate_df(filenames: list, seperator: str =',', encoding: str = 'cp1252', quote_char: str = '"', quoting_lev: int =0):
@@ -49,6 +52,46 @@ def populate_df(filenames: list, seperator: str =',', encoding: str = 'cp1252', 
     return staging_df
 
 
+def chart_waffle(df_ser, labels = None):
+    '''
+    Parameters
+    ----------
+    df_ser : pandas series
+        data to be grouped; should have ser.name intact from df
+    labels : list of strings
+        labels to be used for groups. if None, values in series will be used
+    
+    Returns
+    ----------
+    fig object to be saved or displayed
+    
+    
+    Example usage
+    -------------
+    fig = chart_waffle(df.column_name, ['First Item', 'Second Item'])
+    plt.savefig('./imgs/foo.png')
+    '''
+    df_ser = df_ser.sort_values()
+    if labels is None:
+        labels = list(df_ser.value_counts().index)
+
+    data = dict(zip(labels, df_ser.value_counts().values))
+    fig = plt.figure(
+        FigureClass=Waffle, 
+        rows=5, 
+        values=data, 
+        colors=("#dfed64", "#736464", "#000000", "#ffffff"),
+        title={'label': '{} Breakdown'.format(df_ser.name).format, 'loc': 'left'},
+        labels=["{0} ({1}%)".format(k, v) for k, v in data.items()],
+        icons='child', icon_size=18, 
+        legend={'loc': 'lower left', 'bbox_to_anchor': (0, -0.4), 'ncol': len(data), 'framealpha': 0}
+    )
+    fig.gca().set_facecolor('#EEEEEE')
+    fig.set_facecolor('#EEEEEE')
+
+    return fig
+
+
 def main(args):
     filenames = glob.glob("data/cleaned/*.csv")
     df = populate_df(filenames)
@@ -57,58 +100,3 @@ def main(args):
 if __name__ == '__main__':
     main(sys.argv[1:])
 
-
-''' pp report
-from pandas_profiling import ProfileReport
-import numpy as np
-
-filenames = glob.glob("data/cleaned/*.csv")
-df = populate_df(filenames)
-for i in range(100):
-    randos = [2,np.NaN,np.random.random_integers(8,12),np.random.random_integers(0,1),np.random.choice(['b','w','l','a']),np.random.random_integers(1,5)]
-    randos.extend(np.random.random_integers(1,5,19))
-    randos.extend([np.NaN]*12)
-    df.loc[len(df)] = randos
-
-profile = ProfileReport(df, title='Pandas Profiling Report', explorative=True)
-profile.to_file("your_report.html")
-
-'''
-
-''' waffle chart
-import matplotlib.pyplot as plt
-from pywaffle import Waffle
-
-# randomized
-data = dict(zip(['Asian', 'Latino', 'Black', 'White'],df.ethnicity.value_counts().values))
-fig = plt.figure(
-    FigureClass=Waffle, 
-    rows=5, 
-    values=data, 
-    colors=("#dfed64", "#736464", "#000000", "#ffffff"),
-    title={'label': 'Ethnicity Breakdown', 'loc': 'left'},
-    labels=["{0} ({1}%)".format(k, v) for k, v in data.items()],
-    icons='child', icon_size=18, 
-    legend={'loc': 'lower left', 'bbox_to_anchor': (0, -0.4), 'ncol': len(data), 'framealpha': 0}
-)
-fig.gca().set_facecolor('#EEEEEE')
-fig.set_facecolor('#EEEEEE')
-plt.savefig('./imgs/foo.png')
-
-# pretend actual
-data = dict(zip(['Asian', 'Latino', 'Black', 'White'],[3,32,51,15]))
-fig = plt.figure(
-    FigureClass=Waffle, 
-    rows=5, 
-    values=data, 
-    colors=("#dfed64", "#736464", "#000000", "#ffffff"),
-    title={'label': 'Ethnicity Breakdown', 'loc': 'left'},
-    labels=["{0} ({1}%)".format(k, v) for k, v in data.items()],
-    icons='child', icon_size=18, 
-    legend={'loc': 'lower left', 'bbox_to_anchor': (0, -0.4), 'ncol': len(data), 'framealpha': 0}
-)
-fig.gca().set_facecolor('#EEEEEE')
-fig.set_facecolor('#EEEEEE')
-plt.savefig('./imgs/foo2.png')
-
-'''

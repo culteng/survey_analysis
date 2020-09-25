@@ -38,7 +38,8 @@ def main(args):
         "Any Comments?":"comments"
         }, inplace=True)
     df.columns = [i.replace(' ','_') for i in map(str.lower, df.columns)]
-    # visual for empties # sns.heatmap(df.isnull(), cmap='viridis')
+    # drop duplicates
+    df.drop_duplicates(subset=['ip_address'])
     # convert categoricals, clean others
     df.datetime_submitted = pd.to_datetime(df.datetime_submitted)
     df.grade = df.grade.str.strip('Grade ')
