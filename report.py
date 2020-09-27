@@ -58,9 +58,18 @@ def font_plainerizer():
             cell.text_frame.paragraphs[0].font.size=Pt(14)
 
 
-# insert slide title
-slide = prs.slides.add_slide(prs.slide_layouts[0])
-placeholder = slide.placeholders[22]
-txfr = placeholder.text_frame
-txfr.paragraphs[0].alignment = PP_ALIGN.CENTER
-placeholder.text = school_name
+def slide_title():
+    slide = prs.slides.add_slide(prs.slide_layouts[0])
+    placeholder = slide.placeholders[22]
+    txfr = placeholder.text_frame
+    txfr.paragraphs[0].alignment = PP_ALIGN.CENTER
+    placeholder.text = school_name
+
+
+def main(args):
+    print("report.py main")
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
+
