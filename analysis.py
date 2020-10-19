@@ -1,12 +1,14 @@
 # run analysis on cleaned survey results (csv output from cleaning.py)
+# subprocess.check_call([sys.executable, "-m", "pip", "install", 'seaborn'])
 # python imports 
 import os
 import glob
 import pandas as pd
 import time
-# for waffle
+import seaborn as sns
 import matplotlib.pyplot as plt
 from pywaffle import Waffle
+import plot_likert
 
 
 def populate_df(filenames: list, seperator: str =',', encoding: str = 'cp1252', quote_char: str = '"', quoting_lev: int =0):
@@ -74,7 +76,7 @@ def chart_waffle(df_ser, labels = None):
     df_ser = df_ser.sort_values()
     if labels is None:
         labels = list(df_ser.value_counts().index)
-
+    
     data = dict(zip(labels, df_ser.value_counts().values))
     fig = plt.figure(
         FigureClass=Waffle, 
@@ -88,13 +90,27 @@ def chart_waffle(df_ser, labels = None):
     )
     fig.gca().set_facecolor('#EEEEEE')
     fig.set_facecolor('#EEEEEE')
+    
+    return fig
+    
 
+def chart_likert(df_likerts):
+    # likert_colors = ['white', 'firebrick','lightcoral','gainsboro','cornflowerblue', 'darkblue']
+    df_counts = pd.get_dummies(df_likerts.stack()).groupby(level=1).sum()
+    df_counts.columns = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
+    fig = plot_likert.plot_counts(df_counts, plot_likert.scales.agree)
+    
     return fig
 
 
 def main(args):
     filenames = glob.glob("data/cleaned/*.csv")
     df = populate_df(filenames)
+    
+    #create single likert plot. split by section? summary stats?
+    df_likerts = df.loc[:, df.columns.str.startswith('scl')]
+    ax = chart_likert(df_likerts)
+    plt.savefig('likert1.png', bbox_inches='tight')
 
 
 if __name__ == '__main__':

@@ -7,37 +7,38 @@ from pathlib import Path
 import sys
 
 def main(args):
-    df = pd.read_csv('./data/raw/student-diversity-survey.csv')
+    df = pd.read_csv('./data/raw/cesa-demo.csv')
     # clean & document original questions
     cols_orig = df.columns
+    df.columns = [i.strip().replace('?','') for i in map(str.lower, df.columns)]
     df.rename(columns={
-        "Submitted At":"datetime_submitted",
-        "What Grade are you in?":"grade",
-        "What is your Gender?":"gender",
-        "What is your Ethnicity?":"ethnicity",
-        "How long have you been a student at this school?":"tenure",
-        "Everything that happens on campus is connected to the school\'s mission statement.":"scl_mission_cnct",
-        "The school is very Christ-Centered.":"scl_christ_centered",
-        "School is a \"Happy\" place for me.":"scl_happy",
-        "I am comfortable to speak up about issues going on at school.":"scl_speakup",
-        "It has been explicitly stated how diversity fits into the school\'s mission statement.":"scl_mission_diverse",
-        "The school\'s leadership is excited about diversity.":"scl_ldrshp",
-        "The school celebrates the culture of its students.":"scl_celebr",
-        "I feel like I belong at my school.":"scl_belong",
-        "I have witnessed or experienced bullying on campus (or online) because of cultural differences.":"scl_neg_bully",
-        "Students of different backgrounds get along at school.":"scl_getalong",
-        "School rules are culturally unbiased":"scl_rules",
-        "I regularly attend school-sponsored events (sporting events, student performances, social events, etc.)":"scl_events",
-        "Students are disciplined the same, despite their cultural background.":"scl_discipline",
-        "I am being equipped to thrive in any cultural environment.":"scl_equipped",
-        "We learn about minority people groups, authors, and artists outside of their cultural heritage month. ":"scl_learn",
-        "I feel cared for by my teachers":"scl_cared",
-        "Chapel encourages students to engage the Christian faith cross-culturally. ":"scl_chapel",
-        "I have studied faithful Christians from various American cultures and around the world in classes. ":"scl_cultures",
-        "The school has Christian role models from various cultures on campus as employees or guests.":"scl_rlmdls",
-        "Any Comments?":"comments"
+        "submitted at":"datetime_submitted",
+        "what grade are you in":"grade",
+        "what is your gender":"gender",
+        "what is your ethnicity":"ethnicity",
+        "how many years have you been a student":"tenure_student",
+        "everything that happens on campus is connected to the school's mission statement.":"scl_mission_cnct",
+        "the school is very christ-centered.":"scl_christ_centered",
+        "school is a \"happy\" place for me.":"scl_happy",
+        "i am comfortable to speak up about issues going on at school.":"scl_speakup",
+        "it has been explicitly stated how diversity fits into the school's mission statement.":"scl_mission_diverse",
+        "the school's leadership is excited about diversity.":"scl_ldrshp",
+        "the school celebrates the culture of its students.":"scl_celebr",
+        "i feel like i belong at my school.":"scl_belong",
+        "i have witnessed or experienced bullying on campus (or online) because of cultural differences.":"scl_neg_bully",
+        "students of different backgrounds get along at school.":"scl_getalong",
+        "school rules are culturally unbiased":"scl_rules",
+        "i regularly attend school-sponsored events (sporting events, student performances, social events, etc.)":"scl_events",
+        "students are disciplined the same, despite their cultural background.":"scl_discipline",
+        "i am being equipped to thrive in any cultural environment.":"scl_equipped",
+        "we learn about minority people groups, authors, and artists outside of their cultural heritage month. ":"scl_learn",
+        "i feel cared for by my teachers":"scl_cared",
+        "chapel encourages students to engage the christian faith cross-culturally. ":"scl_chapel",
+        "i have studied faithful christians from various american cultures and around the world in classes. ":"scl_cultures",
+        "the school has christian role models from various cultures on campus as employees or guests.":"scl_rlmdls",
+        "any comments":"comments"
         }, inplace=True)
-    df.columns = [i.replace(' ','_') for i in map(str.lower, df.columns)]
+    df.columns = [i.replace(' ','_') for i in df.columns]
     # drop duplicates
     df.drop_duplicates(subset=['ip_address'])
     # convert categoricals, clean others
