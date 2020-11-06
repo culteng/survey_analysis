@@ -1,0 +1,6 @@
+cd C:\gits\diversity_survey\
+# env from yml
+conda env create -f .\dev\env.yml
+
+# if updates have been made or packages added
+conda env update -n diversity --file ./dev/env.yml  --prune

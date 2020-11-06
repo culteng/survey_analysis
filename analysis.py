@@ -4,6 +4,7 @@
 import os
 import glob
 import pandas as pd
+import numpy as np
 import time
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -94,12 +95,60 @@ def chart_waffle(df_ser, labels = None):
     return fig
     
 
-def chart_likert(df_likerts):
+def chart_likert(df):
     # likert_colors = ['white', 'firebrick','lightcoral','gainsboro','cornflowerblue', 'darkblue']
-    df_counts = pd.get_dummies(df_likerts.stack()).groupby(level=1).sum()
-    df_counts.columns = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
-    fig = plot_likert.plot_counts(df_counts, plot_likert.scales.agree)
+    fig = plot_likert.plot_counts(df, plot_likert.scales.agree)
     
+    return fig
+
+
+def chart_kde(df_kde):
+    fig = sns.kdeplot(x=['scl_happy', 'scl_speakup', 'scl_mission_diverse', 'scl_ldrshp'], y='gender', kind="violin", data=df_kde)
+    
+    return fig
+
+
+def chart_donut(df, col, color_lol):
+    # https://towardsdatascience.com/donut-plot-with-matplotlib-python-be3451f22704
+    df_percs = pd.DataFrame((df.groupby((col)).size())).reset_index()
+    df_percs['percs'] = df_percs[0] / len(df)
+    
+    fig, axs = plt.subplots(1, len(df_percs))
+        
+    for index, row in df_percs.iterrows():
+        print(row["percs"], index)
+        scenario = row[col]
+        percentage = int(round(row["percs"] * 100, 0))
+        textLabel = scenario + ': ' + str(percentage) + '%'
+        donut_sizes = [100 - percentage, percentage] # 
+        axs[index].text(0.01, .8, textLabel, horizontalalignment='center', verticalalignment='center')
+        axs[index].pie(donut_sizes, radius=.7, startangle=90, colors=color_lol[index],
+                wedgeprops={"edgecolor": "white", 'linewidth': 1})
+                
+        circle = plt.Circle(xy=(0, 0), radius=0.35, facecolor='white')
+        axs[index].add_patch(circle)
+    
+    return axs
+    
+
+
+def chart_box(df):
+    fig, ax = plt.subplots(figsize=(10,5))
+    sns.boxplot(x="variable", y="value", data=pd.melt(df))
+    
+
+def table_heat(df):
+    dfstats = df[['mean', 'std']].sort_values(by=['mean'])
+    mask = np.zeros((len(df), 2))
+    mask[:,0] = True
+    fig = sns.heatmap(dfstats, vmin=min(dfstats['std']), vmax=max(dfstats['std']), mask=mask, cmap='RdYlGn_r', linewidths=0.5, annot=True)
+    
+    for (j,i), label in np.ndenumerate(dfstats.values):
+        if i == 0:
+            fig.text(i+0.5, j+0.5, round(label, 1), 
+                    fontdict=dict(ha='center',  va='center',
+                                             color='black', fontsize=20))
+                                             
     return fig
 
 
@@ -107,10 +156,31 @@ def main(args):
     filenames = glob.glob("data/cleaned/*.csv")
     df = populate_df(filenames)
     
-    #create single likert plot. split by section? summary stats?
     df_likerts = df.loc[:, df.columns.str.startswith('scl')]
-    ax = chart_likert(df_likerts)
-    plt.savefig('likert1.png', bbox_inches='tight')
+    df_counts = pd.get_dummies(df_likerts.stack()).groupby(level=1).sum()
+    df_counts.columns = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree']
+    df_likert_stats = df_likerts.join(df_likerts.mean(1).rename('mean')).join(df_likerts.std(1).rename('std'))
+    
+    # heat table
+    plt.clf()
+    ax = table_heat(df_likert_stats.iloc[:5])
+    plt.savefig('./output/heattable1.png', bbox_inches='tight')
+    
+    # create single likert plot. split by section? summary stats?
+    plt.clf()
+    ax = chart_likert(df_counts)
+    plt.savefig('./output/plt_likert.png', bbox_inches='tight')
+    
+    # heatplot
+    plt.clf()
+    ax = chart_kde(df)
+    ax.set_xticklabels(['male','female'])
+    plt.savefig('./output/plt_violin.png', bbox_inches='tight')
+    
+    # gender donut plots
+    plt.clf()
+    ax = chart_donut(df, 'gender', [['#d5f6da', '#5cdb6f'], ['#BED6DD', '#11ADDB']])
+    plt.savefig('./output/plt_donut_genders.jpg', bbox_inches='tight')
 
 
 if __name__ == '__main__':
