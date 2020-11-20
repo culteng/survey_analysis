@@ -4,3 +4,6 @@ conda env create -f .\dev\env.yml
 
 # if updates have been made or packages added
 conda env update -n diversity --file ./dev/env.yml  --prune
+
+# update yml according to local env
+conda env export > .\dev\env.yml
