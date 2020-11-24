@@ -1,0 +1,6 @@
+site_name: Strickland Institute Diversity Portal
+nav:
+    - Home: index.md
+    - Demographpics Overview: demo.md
+    - Section Roll-up: sec.md
+    - Deep Question Results: qbyq.md
